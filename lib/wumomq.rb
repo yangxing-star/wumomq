@@ -1,4 +1,4 @@
-#require 'wumomq/version'
+require 'wumomq/version'
 require 'bunny'
 
 module Wumomq
