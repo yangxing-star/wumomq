@@ -34,16 +34,16 @@ module Wumomq
     end
 
     def publish options = {}
-      (puts "没有消息主体"; return nil) if options[:message].nil? 
-      (puts "没有指定key"; return nil) if options[:key].nil?
+      (puts "没有消息主体(#{__FILE__}.#{__LINE__})"; return nil) if options[:message].nil? 
+      (puts "没有指定key(#{__FILE__}.#{__LINE__})"; return nil) if options[:key].nil?
       q = hash(options[:key])
       @exchange.publish(options[:message], :routing_key => @queue[q].name)
     end
 
     def subscribe options = {}
       # 在登记的时候, key应该是整数
-      (puts "没有处理的consumer"; return false) if options[:consumer].nil? 
-      (puts "key为空"; return false) if options[:key].nil?
+      (puts "没有处理的consumer(#{__FILE__}.#{__LINE__})"; return false) if options[:consumer].nil? 
+      (puts "key为空(#{__FILE__}.#{__LINE__})"; return false) if options[:key].nil?
 
       @consumer = @queue[options[:key]].subscribe(:manual_ack => true, :block => false) do |delivery_info, properties, payload|
          succeed, abort = options[:consumer].process delivery_info, properties, payload
@@ -65,7 +65,7 @@ module Wumomq
   class User < Base
     def initialize options = {}
       uri        = options[:uri]  || uri  = ENV["wumomq_user_uri"]
-      queue_num  = options[:queue_num] || queue_num = 1
+      queue_num  = options[:queue_num] || queue_num = ENV["wumomq_user_queue_nb"] || queue_num = 1
       queue_name = "wumo.user.inbox"
       super uri, queue_name, queue_num
     end
@@ -74,7 +74,7 @@ module Wumomq
   class HR < Base
     def initialize options = {}
       uri        = options[:uri]  || uri  = ENV["wumomq_hr_uri"]
-      queue_num  = options[:queue_num] || queue_num = 1
+      queue_num  = options[:queue_num] || queue_num = ENV["wumomq_hr_queue_nb"] || queue_num = 1
       queue_name = "wumo.hr.inbox"
       super uri, queue_name, queue_num
     end
@@ -83,7 +83,7 @@ module Wumomq
   class OA < Base
     def initialize options = {}
       uri        = options[:uri]  || uri  = ENV["wumomq_oa_uri"]
-      queue_num  = options[:queue_num] || queue_num = 1
+      queue_num  = options[:queue_num] || queue_num = ENV["wumomq_oa_queue_nb"] || queue_num = 1
       queue_name = "wumo.oa.inbox"
       super uri, queue_name, queue_num
     end
@@ -91,8 +91,8 @@ module Wumomq
 
   class Calendar < Base
     def initialize options = {}
-      uri        = options[:uri]  || uri  = ENV["wumomq_oa_uri"]
-      queue_num  = options[:queue_num] || queue_num = 1
+      uri        = options[:uri]  || uri  = ENV["wumomq_cal_uri"]
+      queue_num  = options[:queue_num] || queue_num = ENV["wumomq_cal_queue_nb"] || queue_num = 1
       queue_name = "wumo.oa.inbox"
       super uri, queue_name, queue_num
     end
@@ -101,7 +101,7 @@ module Wumomq
   class Backyard < Base
     def initialize options = {}
       uri        = options[:uri]  || uri  = ENV["wumomq_backyard_uri"]
-      queue_num  = options[:queue_num] || queue_num = 1
+      queue_num  = options[:queue_num] || queue_num = ENV["wumomq_backyard_queue_nb"] || queue_num = 1
       queue_name = "wumo.backyard.inbox"
       super uri, queue_name, queue_num
     end
@@ -110,9 +110,17 @@ module Wumomq
   class InstantMessage < Base
     def initialize options = {}
       uri        = options[:uri]  || uri  = ENV["wumomq_im_uri"]
-      type       = options[:type] || type = ENV["wumomq_im_type"] || type = "message"
-      queue_num  = options[:queue_num] || queue_num = 1
-      queue_name = (type == "message" ? "wumo.im.inbox" : "wumo.im.sync")
+      queue_num  = options[:queue_num] || queue_num = ENV["wumomq_im_queue_nb"] || queue_num = 1
+      queue_name = "wumo.im.inbox"
+      super uri, queue_name, queue_num
+    end
+  end
+
+  class IMSync < Base
+    def initialize options = {}
+      uri        = options[:uri]  || uri  = ENV["wumomq_imsync_uri"]
+      queue_num  = options[:queue_num] || queue_num = ENV["wumomq_imsync_queue_nb"] || queue_num = 1
+      queue_name = "wumo.im.sync"
       super uri, queue_name, queue_num
     end
   end
@@ -120,7 +128,7 @@ module Wumomq
   class Sms < Base
     def initialize options = {}
       uri        = options[:uri]  || uri  = ENV["wumomq_sms_uri"]
-      queue_num  = options[:queue_num] || queue_num = 1
+      queue_num  = options[:queue_num] || queue_num = ENV["wumomq_sms_queue_nb"] || queue_num = 1
       queue_name = "wumo.sms.inbox"
       super uri, queue_name, queue_num
     end
