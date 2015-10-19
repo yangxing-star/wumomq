@@ -6,10 +6,10 @@ require 'wumomq/version'
 Gem::Specification.new do |spec|
   spec.name          = "wumomq"
   spec.version       = Wumomq::VERSION
-  spec.authors       = ["Zhang, Li Zhong"]
-  spec.email         = ["z@neiwang.org"]
-  spec.summary       = "Wrapper for rabbitmq in Wu Mo"
-  spec.description   = "Wrapper for rabbitmq in Wu Mo"
+  spec.authors       = ["Star"]
+  spec.email         = ["137379612@qq.com"]
+  spec.summary       = "Wrapper for rabbitmq"
+  spec.description   = "Wrapper for rabbitmq"
   spec.homepage      = ""
   spec.license       = "MIT"
 
