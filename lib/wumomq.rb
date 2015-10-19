@@ -30,7 +30,7 @@ module Wumomq
     end
 
     def hash value
-      Digest::MD5.hexdigest(value)[0...4].to_i(16) % @num
+      Digest::MD5.hexdigest(value.to_s)[0...4].to_i(16) % @num
     end
 
     def publish options = {}
