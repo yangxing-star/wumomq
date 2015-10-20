@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Star"]
   spec.email         = ["137379612@qq.com"]
   spec.summary       = "Wrapper for rabbitmq"
-  spec.description   = "Wrapper for rabbitmq"
+  spec.description   = "Wrapper for rabbitmq."
   spec.homepage      = ""
   spec.license       = "MIT"
 
