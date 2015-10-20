@@ -29,6 +29,10 @@ module Wumomq
       @num
     end
 
+    def get_queue
+      @queue
+    end
+
     def hash value
       Digest::MD5.hexdigest(value.to_s)[0...4].to_i(16) % @num
     end
@@ -37,7 +41,7 @@ module Wumomq
       (puts "没有消息主体(#{__FILE__}.#{__LINE__})"; return nil) if options[:message].nil? 
       (puts "没有指定key(#{__FILE__}.#{__LINE__})"; return nil) if options[:key].nil?
       q = hash(options[:key])
-      @exchange.publish(options[:message], :routing_key => @queue[q].name)
+      @exchange.publish(options[:message], routing_key: @queue[q].name)
     end
 
     def subscribe options = {}
@@ -46,8 +50,8 @@ module Wumomq
       (puts "key为空(#{__FILE__}.#{__LINE__})"; return false) if options[:key].nil?
 
       @consumer = @queue[options[:key]].subscribe(:manual_ack => true, :block => false) do |delivery_info, properties, payload|
-         succeed, abort = options[:consumer].process delivery_info, properties, payload
-         @channel.acknowledge delivery_info.delivery_tag, false if succeed || abort
+        succeed, abort = options[:consumer].process delivery_info, properties, payload
+        @channel.acknowledge delivery_info.delivery_tag, false if succeed || abort
       end
 
       true
