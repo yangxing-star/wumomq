@@ -137,4 +137,12 @@ module Wumomq
       super uri, queue_name, queue_num
     end
   end
+  class Delay < Base
+    def initialize options = {}
+      uri        = options[:uri] || ENV['wumomq_delay_uri']
+      queue_num  = options[:queue_num] || ENV['wumomq_delay_queue_nb'] || 1
+      queue_name = 'wumo.delay.inbox'
+      super uri, queue_name, queue_num
+    end
+  end
 end
