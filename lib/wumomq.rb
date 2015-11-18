@@ -18,7 +18,7 @@ module Wumomq
       @num       = queue_num
       @queue     = Array.new
       (0...@num).each { |i|
-        @queue.push(@channel.queue("#{queue_name}.#{i}", :auto_delete => false))
+        @queue.push(@channel.queue("#{queue_name}.#{i}", auto_delete: false))
       }
 
       @consumer  = nil
@@ -33,6 +33,10 @@ module Wumomq
       @queue
     end
 
+    def status
+      @conn.status
+    end
+
     def hash value
       Digest::MD5.hexdigest(value.to_s)[0...4].to_i(16) % @num
     end
@@ -43,8 +47,8 @@ module Wumomq
       q = hash(options[:key])
       @exchange.publish(options[:message], routing_key: @queue[q].name)
 
-      # sleep 1
-      # close
+      sleep 1
+      close
     end
 
     def subscribe options = {}
@@ -53,7 +57,7 @@ module Wumomq
         (puts "没有处理的consumer(#{__FILE__}.#{__LINE__})"; return false) if options[:consumer].nil? 
         (puts "key为空(#{__FILE__}.#{__LINE__})"; return false) if options[:key].nil?
 
-        @consumer = @queue[options[:key]].subscribe(:manual_ack => true, :block => false) do |delivery_info, properties, payload|
+        @consumer = @queue[options[:key]].subscribe(manual_ack: true, block: false) do |delivery_info, properties, payload|
           succeed, abort = options[:consumer].process delivery_info, properties, payload
           @channel.acknowledge delivery_info.delivery_tag, false if succeed || abort
         end
@@ -69,7 +73,6 @@ module Wumomq
     end
 
     def close
-      @channel.close
       @conn.close
     end
   end
