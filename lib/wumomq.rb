@@ -43,8 +43,8 @@ module Wumomq
       q = hash(options[:key])
       @exchange.publish(options[:message], routing_key: @queue[q].name)
 
-      sleep 1
-      close
+      # sleep 1
+      # close
     end
 
     def subscribe options = {}
