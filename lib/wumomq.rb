@@ -6,7 +6,7 @@ module Wumomq
     def process delivery_info, properties, payload
       raise NotImplementedError, "Implement this method in a child class"
 
-      # 应该返回2个值，succeed，abort
+      # return 2 params，succeed，abort
     end
   end
 
@@ -42,19 +42,26 @@ module Wumomq
       (puts "没有指定key(#{__FILE__}.#{__LINE__})"; return nil) if options[:key].nil?
       q = hash(options[:key])
       @exchange.publish(options[:message], routing_key: @queue[q].name)
+
+      sleep 1
+      close
     end
 
     def subscribe options = {}
-      # 在登记的时候, key应该是整数
-      (puts "没有处理的consumer(#{__FILE__}.#{__LINE__})"; return false) if options[:consumer].nil? 
-      (puts "key为空(#{__FILE__}.#{__LINE__})"; return false) if options[:key].nil?
+      begin
+        # 在登记的时候, key应该是整数
+        (puts "没有处理的consumer(#{__FILE__}.#{__LINE__})"; return false) if options[:consumer].nil? 
+        (puts "key为空(#{__FILE__}.#{__LINE__})"; return false) if options[:key].nil?
 
-      @consumer = @queue[options[:key]].subscribe(:manual_ack => true, :block => false) do |delivery_info, properties, payload|
-        succeed, abort = options[:consumer].process delivery_info, properties, payload
-        @channel.acknowledge delivery_info.delivery_tag, false if succeed || abort
+        @consumer = @queue[options[:key]].subscribe(:manual_ack => true, :block => false) do |delivery_info, properties, payload|
+          succeed, abort = options[:consumer].process delivery_info, properties, payload
+          @channel.acknowledge delivery_info.delivery_tag, false if succeed || abort
+        end
+        true
+      rescue Interrupt => _
+        close
+        false
       end
-
-      true
     end
 
     def cancel
@@ -62,86 +69,87 @@ module Wumomq
     end
 
     def close
+      @channel.close
       @conn.close
     end
   end
 
   class User < Base
     def initialize options = {}
-      uri        = options[:uri] || ENV['wumomq_user_uri']
-      queue_num  = options[:queue_num] || ENV['wumomq_user_queue_nb'] || 1
-      queue_name = 'wumo.user.inbox'
+      uri        = options[:uri] || ENV['user_uri']
+      queue_num  = options[:queue_num] || ENV['user_queue_nb'] || 1
+      queue_name = 'user.inbox'
       super uri, queue_name, queue_num
     end
   end
 
   class HR < Base
     def initialize options = {}
-      uri        = options[:uri] || ENV['wumomq_hr_uri']
-      queue_num  = options[:queue_num] || ENV['wumomq_hr_queue_nb'] || 1
-      queue_name = 'wumo.hr.inbox'
+      uri        = options[:uri] || ENV['hr_uri']
+      queue_num  = options[:queue_num] || ENV['hr_queue_nb'] || 1
+      queue_name = 'hr.inbox'
       super uri, queue_name, queue_num
     end
   end
 
   class OA < Base
     def initialize options = {}
-      uri        = options[:uri] || ENV['wumomq_oa_uri']
-      queue_num  = options[:queue_num] || ENV['wumomq_oa_queue_nb'] || 1
-      queue_name = 'wumo.oa.inbox'
+      uri        = options[:uri] || ENV['oa_uri']
+      queue_num  = options[:queue_num] || ENV['oa_queue_nb'] || 1
+      queue_name = 'oa.inbox'
       super uri, queue_name, queue_num
     end
   end
 
   class Calendar < Base
     def initialize options = {}
-      uri        = options[:uri] || ENV['wumomq_cal_uri']
-      queue_num  = options[:queue_num] || ENV['wumomq_cal_queue_nb'] || 1
-      queue_name = 'wumo.oa.inbox'
+      uri        = options[:uri] || ENV['cal_uri']
+      queue_num  = options[:queue_num] || ENV['cal_queue_nb'] || 1
+      queue_name = 'oa.inbox'
       super uri, queue_name, queue_num
     end
   end
 
   class Backyard < Base
     def initialize options = {}
-      uri        = options[:uri] || ENV['wumomq_backyard_uri']
-      queue_num  = options[:queue_num] || ENV['wumomq_backyard_queue_nb'] || 1
-      queue_name = 'wumo.backyard.inbox'
+      uri        = options[:uri] || ENV['backyard_uri']
+      queue_num  = options[:queue_num] || ENV['backyard_queue_nb'] || 1
+      queue_name = 'backyard.inbox'
       super uri, queue_name, queue_num
     end
   end
 
   class InstantMessage < Base
     def initialize options = {}
-      uri        = options[:uri] || ENV['wumomq_im_uri']
-      queue_num  = options[:queue_num] || ENV['wumomq_im_queue_nb'] || 1
-      queue_name = 'wumo.im.inbox'
+      uri        = options[:uri] || ENV['im_uri']
+      queue_num  = options[:queue_num] || ENV['im_queue_nb'] || 1
+      queue_name = 'im.inbox'
       super uri, queue_name, queue_num
     end
   end
 
   class IMSync < Base
     def initialize options = {}
-      uri        = options[:uri] || ENV['wumomq_imsync_uri']
-      queue_num  = options[:queue_num] || ENV['wumomq_imsync_queue_nb'] || 1
-      queue_name = 'wumo.im.sync'
+      uri        = options[:uri] || ENV['imsync_uri']
+      queue_num  = options[:queue_num] || ENV['imsync_queue_nb'] || 1
+      queue_name = 'im.sync'
       super uri, queue_name, queue_num
     end
   end
 
   class Sms < Base
     def initialize options = {}
-      uri        = options[:uri] || ENV['wumomq_sms_uri']
-      queue_num  = options[:queue_num] || ENV['wumomq_sms_queue_nb'] || 1
-      queue_name = 'wumo.sms.inbox'
+      uri        = options[:uri] || ENV['sms_uri']
+      queue_num  = options[:queue_num] || ENV['sms_queue_nb'] || 1
+      queue_name = 'sms.inbox'
       super uri, queue_name, queue_num
     end
   end
   class Delay < Base
     def initialize options = {}
-      uri        = options[:uri] || ENV['wumomq_delay_uri']
-      queue_num  = options[:queue_num] || ENV['wumomq_delay_queue_nb'] || 1
-      queue_name = 'wumo.delay.inbox'
+      uri        = options[:uri] || ENV['delay_uri']
+      queue_num  = options[:queue_num] || ENV['delay_queue_nb'] || 1
+      queue_name = 'delay.inbox'
       super uri, queue_name, queue_num
     end
   end
