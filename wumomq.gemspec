@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Star"]
   spec.email         = ["137379612@qq.com"]
   spec.summary       = "Wrapper for rabbitmq"
-  spec.description   = "Wrapper for rabbitmq."
-  spec.homepage      = ""
+  spec.description   = "Wrapper for rabbitmq, define queue."
+  spec.homepage      = "http://yangxing.me"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
