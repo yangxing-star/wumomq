@@ -16,10 +16,12 @@ module Wumomq
       @conn.start
       @channel   = @conn.create_channel
       @num       = queue_num
-      @queue     = Array.new
-      (0...@num).each { |i|
-        @queue.push(@channel.queue("#{queue_name}.#{i}", auto_delete: false))
-      }
+      @queues    = Array.new
+      (0...@num).each do |i|
+        queue = @channel.queue("#{queue_name}.#{i}", auto_delete: false)
+        # queue.bind('sneakers', routing_key: "#{queue_name}.#{i}")
+        @queues.push(queue)
+      end
 
       @consumer  = nil
       @exchange  = @channel.default_exchange
@@ -30,7 +32,7 @@ module Wumomq
     end
 
     def get_queue
-      @queue
+      @queues
     end
 
     def status
@@ -45,7 +47,7 @@ module Wumomq
       (puts "没有消息主体(#{__FILE__}.#{__LINE__})"; return nil) if options[:message].nil? 
       (puts "没有指定key(#{__FILE__}.#{__LINE__})"; return nil) if options[:key].nil?
       q = hash(options[:key])
-      @exchange.publish(options[:message], routing_key: @queue[q].name)
+      @exchange.publish(options[:message], routing_key: @queues[q].name)
 
       close if options[:close]
     end
@@ -56,7 +58,7 @@ module Wumomq
         (puts "没有处理的consumer(#{__FILE__}.#{__LINE__})"; return false) if options[:consumer].nil? 
         (puts "key为空(#{__FILE__}.#{__LINE__})"; return false) if options[:key].nil?
 
-        @consumer = @queue[options[:key]].subscribe(manual_ack: true, block: false) do |delivery_info, properties, payload|
+        @consumer = @queues[options[:key]].subscribe(manual_ack: true, block: false) do |delivery_info, properties, payload|
           succeed, abort = options[:consumer].process delivery_info, properties, payload
           @channel.acknowledge delivery_info.delivery_tag, false if succeed || abort
         end
@@ -153,6 +155,15 @@ module Wumomq
       uri        = options[:uri] || ENV['delay_uri']
       queue_num  = options[:queue_num] || ENV['delay_queue_nb'] || 1
       queue_name = 'delay.inbox'
+      super uri, queue_name, queue_num
+    end
+  end
+
+  class PushMessage < Base
+    def initialize options = {}
+      uri        = options[:uri] || ENV['push_uri']
+      queue_num  = options[:queue_num] || ENV['push_queue_nb'] || 1
+      queue_name = 'im.push'
       super uri, queue_name, queue_num
     end
   end
